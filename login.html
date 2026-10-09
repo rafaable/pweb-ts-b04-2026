@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Antrian Rumah Sakit</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: system-ui, sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #f0fdf4);
+      color: #0f172a;
+    }
+    .card {
+      width: min(380px, 92vw);
+      padding: 2rem;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+    }
+    h1 { margin: 0 0 0.25rem; font-size: 1.5rem; }
+    p.sub { margin: 0 0 1.5rem; color: #64748b; font-size: 0.9rem; }
+    label { display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600; }
+    input {
+      width: 100%;
+      padding: 0.65rem 0.8rem;
+      margin-bottom: 1rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    input:focus { outline: 2px solid #0284c7; border-color: transparent; }
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      border: 0;
+      border-radius: 8px;
+      background: #0284c7;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover:not(:disabled) { background: #0369a1; }
+    button:disabled { opacity: 0.7; cursor: wait; }
+    button.loading::after {
+      content: "";
+      display: inline-block;
+      width: 0.9em;
+      height: 0.9em;
+      margin-left: 0.5em;
+      vertical-align: -0.1em;
+      border: 2px solid #fff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #error {
+      margin-bottom: 1rem;
+      padding: 0.65rem 0.8rem;
+      border-radius: 8px;
+      background: #fee2e2;
+      color: #991b1b;
+      font-size: 0.9rem;
+    }
+    #session-notice p { margin: 0 0 1rem; padding: 0.65rem 0.8rem; border-radius: 8px; background: #e0f2fe; color: #075985; font-size: 0.9rem; }
+    #session-notice button { margin-bottom: 0.6rem; }
+    button.secondary { background: #fff; color: #0284c7; border: 1px solid #0284c7; }
+    button.secondary:hover:not(:disabled) { background: #f0f9ff; }
+    .links { margin-top: 1.25rem; text-align: center; font-size: 0.85rem; }
+    .links a { color: #0284c7; }
+  </style>
+  <script type="module" src="dist/login.js" defer></script>
+</head>
+<body>
+  <main class="card">
+    <h1>Antrian Rumah Sakit</h1>
+    <p class="sub">Masuk untuk admin dan operator</p>
+
+    <div id="session-notice" hidden>
+      <p id="session-text"></p>
+      <button id="continue-btn" type="button">Lanjutkan</button>
+      <button id="switch-btn" class="secondary" type="button">Logout</button>
+    </div>
+
+    <div id="error" role="alert" hidden></div>
+
+    <form id="login-form">
+      <label for="username">Username</label>
+      <input id="username" type="text" autocomplete="username" required />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required />
+
+      <button id="submit-btn" type="submit">Masuk</button>
+    </form>
+
+    <div class="links">
+      <a href="ambil-antrian.html">Ambil Antrian</a> ·
+      <a href="layar.html">Layar Antrian</a>
+    </div>
+  </main>
+</body>
+</html>

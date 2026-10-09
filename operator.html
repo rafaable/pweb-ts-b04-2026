@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Operator - Antrian Rumah Sakit</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; }
+    header {
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+      padding: 0.8rem 1.5rem; background: #0284c7; color: #fff;
+    }
+    header h1 { margin: 0; font-size: 1.15rem; }
+    header .right { display: flex; align-items: center; gap: 0.8rem; font-size: 0.9rem; }
+    #logout-btn {
+      padding: 0.4rem 0.9rem; border: 1px solid #fff; border-radius: 6px;
+      background: transparent; color: #fff; cursor: pointer;
+    }
+    #logout-btn:hover { background: rgba(255, 255, 255, 0.2); }
+    main { max-width: 900px; margin: 1.5rem auto; padding: 0 1rem; display: grid; gap: 1rem; }
+    .card { background: #fff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08); }
+    .picker { display: flex; align-items: center; gap: 0.75rem; }
+    .picker label { font-weight: 600; }
+    select { padding: 0.5rem 0.7rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; }
+    #message { padding: 0.7rem 1rem; border-radius: 8px; background: #fef3c7; color: #92400e; }
+    .panel { display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; }
+    @media (max-width: 640px) { .panel { grid-template-columns: 1fr; } }
+    .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+    .big { margin: 0.3rem 0; font-size: 4rem; font-weight: 800; line-height: 1; color: #0284c7; }
+    .mid { margin: 0.3rem 0; font-size: 2.2rem; font-weight: 700; }
+    .meta { color: #64748b; font-size: 0.9rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .actions button {
+      flex: 1; min-width: 150px; padding: 0.9rem 1rem; border: 0; border-radius: 10px;
+      font-size: 1rem; font-weight: 600; color: #fff; cursor: pointer;
+    }
+    .actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+    #btn-next { background: #0284c7; }
+    #btn-skip { background: #d97706; }
+    #btn-done { background: #16a34a; }
+    ul { list-style: none; margin: 0.75rem 0 0; padding: 0; }
+    li { display: flex; justify-content: space-between; align-items: center; padding: 0.55rem 0; border-top: 1px solid #e2e8f0; }
+    li:first-child { border-top: 0; }
+    .badge { padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; background: #e2e8f0; color: #334155; }
+    .badge.vip { background: #fde68a; color: #92400e; }
+    .badge.disabilitas { background: #bfdbfe; color: #1e40af; }
+    .badge.lansia { background: #bbf7d0; color: #166534; }
+  </style>
+  <script type="module" src="dist/operator.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>Panel Operator</h1>
+    <div class="right">
+      <span id="user-info"></span>
+      <button id="logout-btn" type="button">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="card picker">
+      <label for="queue-select">Jenis Antrian</label>
+      <select id="queue-select"></select>
+    </div>
+
+    <div id="message" hidden></div>
+
+    <div class="panel">
+      <div class="card">
+        <div class="label">Sedang dipanggil</div>
+        <div class="big" id="current-ticket">-</div>
+        <div class="meta" id="current-meta"></div>
+      </div>
+      <div class="card">
+        <div class="label">Berikutnya</div>
+        <div class="mid" id="next-ticket">-</div>
+        <div class="meta">Menunggu: <span id="waiting-count">0</span></div>
+      </div>
+    </div>
+
+    <div class="card actions">
+      <button id="btn-next" type="button">Panggil Berikutnya</button>
+      <button id="btn-skip" type="button">Lewati</button>
+      <button id="btn-done" type="button">Selesai</button>
+    </div>
+
+    <div class="card">
+      <div class="label">Daftar tunggu (urut prioritas)</div>
+      <ul id="waiting-list"></ul>
+    </div>
+  </main>
+</body>
+</html>

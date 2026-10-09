@@ -12,8 +12,8 @@ Aplikasi antrian rumah sakit dengan **TypeScript native** (tanpa framework/libra
 | Pemilik | Halaman | Status |
 |---|---|---|
 | Ava | 1. `login.html`, 3. `operator.html` | Selesai (siap dites bersama) |
-| Teman A | 2. `index.html` (dashboard admin) | Belum |
-| Teman B | 4. `layar.html`, 5. `ambil-antrian.html` | Belum |
+| Nay | 2. `index.html` (dashboard admin) | Belum |
+| Rafa | 4. `layar.html`, 5. `ambil-antrian.html` | Belum |
 
 ## Cara menjalankan
 
@@ -67,7 +67,7 @@ interface Ticket    { id: string; code: string; number: number; priority: Priori
 
 ## Yang harus dikerjakan
 
-### Teman A — `index.html` (Dashboard Admin)
+### Nay — `index.html` (Dashboard Admin)
 
 File: `index.html`, `src/index.ts`
 
@@ -82,7 +82,7 @@ File: `index.html`, `src/index.ts`
 
 Catatan: kalau belum ada jenis antrian sama sekali, halaman lain tidak punya data. Pertimbangkan membuat 1–2 jenis awal agar demo mudah.
 
-### Teman B — `layar.html` dan `ambil-antrian.html`
+### Rafa — `layar.html` dan `ambil-antrian.html`
 
 Keduanya **publik** (tanpa login, tanpa `requireAuth`).
 

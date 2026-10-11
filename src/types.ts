@@ -24,10 +24,11 @@ export interface Ticket {
   createdAt: number;
 }
 
-// lower = served first
+// Prioritas: vip, disabilitas, lansia (0) lebih didahulukan daripada normal (1).
+// Antar sesama prioritas diurutkan berdasarkan angka antrian.
 export const PRIORITY_RANK: Record<Priority, number> = {
   vip: 0,
-  disabilitas: 1,
-  lansia: 2,
-  normal: 3,
+  disabilitas: 0,
+  lansia: 0,
+  normal: 1,
 };

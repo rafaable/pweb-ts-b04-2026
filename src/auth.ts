@@ -40,13 +40,15 @@ export async function login(username: string, password: string): Promise<Session
 
   const session: Session = { token, role: me.role, firstName: data.firstName };
   saveSession(session);
+  localStorage.setItem("firstName", data.firstName);
   return session;
 }
 
 // Returns the session, or redirects to login.html and returns null.
 export function requireAuth(allowed?: (role: Role) => boolean): Session | null {
   const session = getSession();
-  if (!session || (allowed && !allowed(session.role))) {
+  const firstName = localStorage.getItem("firstName") || session?.firstName;
+  if (!session || !firstName || (allowed && !allowed(session.role))) {
     window.location.replace("login.html");
     return null;
   }
@@ -55,5 +57,6 @@ export function requireAuth(allowed?: (role: Role) => boolean): Session | null {
 
 export function logout(): void {
   clearSession();
+  localStorage.removeItem("firstName");
   window.location.replace("login.html");
 }

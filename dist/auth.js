@@ -24,12 +24,14 @@ export async function login(username, password) {
         throw new Error(me.message ?? "Gagal mengambil role pengguna");
     const session = { token, role: me.role, firstName: data.firstName };
     saveSession(session);
+    localStorage.setItem("firstName", data.firstName);
     return session;
 }
 // Returns the session, or redirects to login.html and returns null.
 export function requireAuth(allowed) {
     const session = getSession();
-    if (!session || (allowed && !allowed(session.role))) {
+    const firstName = localStorage.getItem("firstName") || session?.firstName;
+    if (!session || !firstName || (allowed && !allowed(session.role))) {
         window.location.replace("login.html");
         return null;
     }
@@ -37,5 +39,6 @@ export function requireAuth(allowed) {
 }
 export function logout() {
     clearSession();
+    localStorage.removeItem("firstName");
     window.location.replace("login.html");
 }

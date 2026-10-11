@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ambil Nomor Antrian</title>
+    <script>
+        // Auth Guard: Memastikan pengguna sudah login dan firstName terverifikasi punya role "user"
+        (function () {
+            const firstName = localStorage.getItem("firstName");
+            let session = null;
+            try {
+                session = JSON.parse(localStorage.getItem("session"));
+            } catch (e) { }
+
+            const activeFirstName = firstName || session?.firstName;
+            if (!activeFirstName) {
+                window.location.replace("login.html");
+                return;
+            }
+
+            // Jika ada sesi tapi role bukan "user", tolak akses
+            if (session && session.role && session.role !== "user") {
+                localStorage.removeItem("firstName");
+                localStorage.removeItem("session");
+                window.location.replace("login.html");
+                return;
+            }
+
+            // Periksa API https://dummyjson.com/users/filter?key=role&value=user
+            // dan pastikan firstName yang tersimpan di local storage punya role : "user"
+            fetch("https://dummyjson.com/users/filter?key=role&value=user")
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    let users = data.users || [];
+                    let matched = users.find(function (u) {
+                        return u.firstName && u.firstName.toLowerCase() === activeFirstName.toLowerCase();
+                    });
+
+                    if (!matched && data.total > users.length) {
+                        return fetch("https://dummyjson.com/users/filter?key=role&value=user&limit=0")
+                            .then(function (res2) { return res2.json(); })
+                            .then(function (data2) {
+                                users = data2.users || [];
+                                return users.find(function (u) {
+                                    return u.firstName && u.firstName.toLowerCase() === activeFirstName.toLowerCase();
+                                });
+                            });
+                    }
+                    return matched;
+                })
+                .then(function (userMatch) {
+                    if (!userMatch || userMatch.role !== "user") {
+                        localStorage.removeItem("firstName");
+                        localStorage.removeItem("session");
+                        window.location.replace("login.html");
+                    } else if (!firstName && activeFirstName) {
+                        localStorage.setItem("firstName", activeFirstName);
+                    }
+                })
+                .catch(function (err) {
+                    console.error("Gagal verifikasi role user:", err);
+                });
+        })();
+    </script>
+    <style>
+        :root {
+            /* Teal Colors */
+            --primary-teal: #10787B;
+            --soft-teal: #AED9DE;
+            --pale-teal: #E3EFEF;
+            --muted-teal: #C1DBDB;
+            --cool-gray-teal: #D2DDDC;
+
+            /* White Colors */
+            --ice-white: #F1F8F9;
+            --off-white: #FEFEFE;
+
+            /* Gray Colors */
+            --charcoal: #30302E;
+            --cool-gray: #A3B0B7;
+            --neutral-gray: #C1C2C1;
+
+            /* Blue Colors */
+            --muted-blue: #5F95A4;
+
+            /* Additional Shades */
+            --deep-teal: #0C6669;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--ice-white);
+            color: var(--charcoal);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Top Navigation Bar */
+        .top-navbar {
+            background-color: var(--primary-teal);
+            color: var(--off-white);
+            padding: 12px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(16, 120, 123, 0.15);
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 50;
+            overflow: visible;
+        }
+
+        .brand-logo {
+            position: absolute;
+            top: 0px;
+            left: 24px;
+            height: 64px;
+            width: auto;
+            object-fit: contain;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            padding-left: 72px;
+            text-decoration: none;
+            color: var(--off-white);
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 14px;
+        }
+
+        .user-greeting {
+            color: var(--off-white);
+            font-weight: 500;
+        }
+
+        .user-greeting strong {
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .btn-logout {
+            background: rgba(254, 254, 254, 0.15);
+            border: 1px solid rgba(254, 254, 254, 0.4);
+            color: var(--off-white);
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-logout:hover {
+            background: rgba(254, 254, 254, 0.28);
+            border-color: var(--off-white);
+        }
+
+        .btn-logout:active {
+            transform: scale(0.97);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 28px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--charcoal);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-buttons {
+            display: flex;
+            background-color: var(--cool-gray-teal);
+            padding: 4px;
+            border-radius: 8px;
+            gap: 4px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--charcoal);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--muted-teal);
+            color: var(--deep-teal);
+        }
+
+        .nav-btn:active {
+            transform: scale(0.97);
+        }
+
+        .nav-btn.active {
+            background-color: var(--charcoal);
+            color: var(--off-white);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-fullscreen {
+            background-color: var(--cool-gray-teal);
+            border: none;
+            padding: 8px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--charcoal);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-fullscreen:hover {
+            background-color: var(--muted-teal);
+            color: var(--deep-teal);
+        }
+
+        .btn-fullscreen:active {
+            transform: scale(0.97);
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--cool-gray);
+            margin-bottom: 28px;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background-color: var(--off-white);
+            border: 1px solid var(--cool-gray-teal);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(16, 120, 123, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(16, 120, 123, 0.12);
+            border-color: var(--muted-teal);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--charcoal);
+        }
+
+        .card-badge {
+            background-color: var(--pale-teal);
+            color: var(--primary-teal);
+            font-size: 12px;
+            font-weight: 700;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .btn-ambil {
+            width: 100%;
+            background-color: var(--primary-teal);
+            color: var(--off-white);
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 8px rgba(16, 120, 123, 0.25);
+            margin-top: 14px;
+        }
+
+        .btn-ambil:hover {
+            background-color: var(--deep-teal);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(16, 120, 123, 0.35);
+        }
+
+        .btn-ambil:active {
+            transform: translateY(1px);
+            background-color: #094e50;
+            box-shadow: 0 2px 4px rgba(16, 120, 123, 0.25);
+        }
+
+        /* Priority Section */
+        .priority-section {
+            border-top: 1px dashed var(--cool-gray-teal);
+            padding-top: 12px;
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .priority-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted-blue);
+        }
+
+        .priority-select {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--charcoal);
+            background-color: var(--off-white);
+            border: 1px solid var(--cool-gray-teal);
+            border-radius: 8px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .priority-select:hover {
+            border-color: var(--primary-teal);
+        }
+
+        .priority-select:focus {
+            border-color: var(--primary-teal);
+            box-shadow: 0 0 0 3px rgba(16, 120, 123, 0.15);
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            font-size: 13px;
+            color: var(--cool-gray);
+            padding-top: 16px;
+            border-top: 1px solid var(--cool-gray-teal);
+        }
+
+        /* Modal Notification */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(48, 48, 46, 0.5);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--off-white);
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .modal h3 {
+            color: var(--primary-teal);
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .modal p {
+            color: var(--charcoal);
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .modal-btn {
+            background-color: var(--primary-teal);
+            color: var(--off-white);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-btn:hover {
+            background-color: var(--deep-teal);
+        }
+
+        /* Responsive adjustments */
+        @media(max-width: 768px) {
+            .top-navbar {
+                padding: 12px 16px;
+            }
+
+            .brand-logo {
+                left: 14px;
+                top: 4px;
+                height: 52px;
+            }
+
+            .brand {
+                padding-left: 58px;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .nav-btn {
+                flex: 1;
+                text-align: center;
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+
+            .btn-fullscreen {
+                width: 100%;
+                text-align: center;
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="top-navbar">
+        <img src="logo.png" alt="Logo B04 Medical" class="brand-logo">
+        <div class="brand">
+            <span class="brand-name">B04 Medical</span>
+        </div>
+        <div class="user-panel">
+            <span class="user-greeting">Selamat datang, <strong id="user-greeting">Pengguna</strong></span>
+            <button class="btn-logout" type="button" onclick="logoutUser()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <div>
+                <h1>Ambil nomor antrian</h1>
+                <p class="subtitle">Pilih jenis layanan untuk mengambil nomor antrian.</p>
+            </div>
+            <div class="header-actions">
+                <div class="nav-buttons">
+                    <button class="nav-btn" onclick="window.location.href='layar.html'">Layar Antrian</button>
+                    <button class="nav-btn active" onclick="window.location.href='ambil-antrian.html'">Ambil
+                        Nomor</button>
+                </div>
+                <button class="btn-fullscreen" id="fullscreen-btn" onclick="toggleFullscreen()">Layar penuh</button>
+            </div>
+        </header>
+
+        <div class="cards-grid">
+            <!-- Card 1: UMUM-1 -->
+            <div class="card">
+                <div>
+                    <div class="card-header">
+                        <span class="card-title">UMUM-1</span>
+                        <span class="card-badge">A</span>
+                    </div>
+                    <div class="priority-section">
+                        <label class="priority-label" for="priority-UMUM-1">Pilih prioritas:</label>
+                        <select class="priority-select" id="priority-UMUM-1">
+                            <option value="Normal" selected>Normal</option>
+                            <option value="Lansia">Lansia</option>
+                            <option value="Disabilitas">Disabilitas</option>
+                            <option value="VIP">VIP</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-ambil" onclick="ambilNomor('UMUM-1', this)">Ambil Nomor</button>
+            </div>
+
+            <!-- Card 2: UMUM-2 -->
+            <div class="card">
+                <div>
+                    <div class="card-header">
+                        <span class="card-title">UMUM-2</span>
+                        <span class="card-badge">B</span>
+                    </div>
+                    <div class="priority-section">
+                        <label class="priority-label" for="priority-UMUM-2">Pilih prioritas:</label>
+                        <select class="priority-select" id="priority-UMUM-2">
+                            <option value="Normal" selected>Normal</option>
+                            <option value="Lansia">Lansia</option>
+                            <option value="Disabilitas">Disabilitas</option>
+                            <option value="VIP">VIP</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-ambil" onclick="ambilNomor('UMUM-2', this)">Ambil Nomor</button>
+            </div>
+
+            <!-- Card 3: UMUM-3 -->
+            <div class="card">
+                <div>
+                    <div class="card-header">
+                        <span class="card-title">UMUM-3</span>
+                        <span class="card-badge">C</span>
+                    </div>
+                    <div class="priority-section">
+                        <label class="priority-label" for="priority-UMUM-3">Pilih prioritas:</label>
+                        <select class="priority-select" id="priority-UMUM-3">
+                            <option value="Normal" selected>Normal</option>
+                            <option value="Lansia">Lansia</option>
+                            <option value="Disabilitas">Disabilitas</option>
+                            <option value="VIP">VIP</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-ambil" onclick="ambilNomor('UMUM-3', this)">Ambil Nomor</button>
+            </div>
+
+            <!-- Card 4: GIGI -->
+            <div class="card">
+                <div>
+                    <div class="card-header">
+                        <span class="card-title">GIGI</span>
+                        <span class="card-badge">G</span>
+                    </div>
+                    <div class="priority-section">
+                        <label class="priority-label" for="priority-GIGI">Pilih prioritas:</label>
+                        <select class="priority-select" id="priority-GIGI">
+                            <option value="Normal" selected>Normal</option>
+                            <option value="Lansia">Lansia</option>
+                            <option value="Disabilitas">Disabilitas</option>
+                            <option value="VIP">VIP</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-ambil" onclick="ambilNomor('GIGI', this)">Ambil Nomor</button>
+            </div>
+
+            <!-- Card 5: FARMASI -->
+            <div class="card">
+                <div>
+                    <div class="card-header">
+                        <span class="card-title">FARMASI</span>
+                        <span class="card-badge">F</span>
+                    </div>
+                    <div class="priority-section">
+                        <label class="priority-label" for="priority-FARMASI">Pilih prioritas:</label>
+                        <select class="priority-select" id="priority-FARMASI">
+                            <option value="Normal" selected>Normal</option>
+                            <option value="Lansia">Lansia</option>
+                            <option value="Disabilitas">Disabilitas</option>
+                            <option value="VIP">VIP</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-ambil" onclick="ambilNomor('FARMASI', this)">Ambil Nomor</button>
+            </div>
+
+            <!-- Card 6: PSIKOLOG -->
+            <div class="card">
+                <div>
+                    <div class="card-header">
+                        <span class="card-title">PSIKOLOG</span>
+                        <span class="card-badge">P</span>
+                    </div>
+                    <div class="priority-section">
+                        <label class="priority-label" for="priority-PSIKOLOG">Pilih prioritas:</label>
+                        <select class="priority-select" id="priority-PSIKOLOG">
+                            <option value="Normal" selected>Normal</option>
+                            <option value="Lansia">Lansia</option>
+                            <option value="Disabilitas">Disabilitas</option>
+                            <option value="VIP">VIP</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-ambil" onclick="ambilNomor('PSIKOLOG', this)">Ambil Nomor</button>
+            </div>
+        </div>
+
+        <footer>
+            <span id="footer-text">Jenis antrian baru muncul otomatis. Data: [tanggal sekarang]</span>
+        </footer>
+    </div>
+
+    <!-- Modal Notifikasi Interaktif -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3>Nomor Berhasil Diambil</h3>
+            <p id="modalMessage">Silakan tunggu nomor panggilan Anda.</p>
+            <button class="modal-btn" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+
+    <script type="module" src="dist/ambilAntrian.js" defer></script>
+</body>
+
+</html>

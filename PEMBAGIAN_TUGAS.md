@@ -144,6 +144,12 @@ Setiap orang membuat snippet seed (sesi palsu, jenis antrian, tiket) agar halama
 - [ ] Login admin/moderator → dashboard, login user → operator; akses tanpa login diarahkan ke `login.html`.
 - [ ] Repo publik, `dist/` ter-commit, `tsconfig.json` ada, link dikumpulkan di https://its.id/m/SubmitPemweb2026.
 
-## Nilai (rubrik)
+## Panduan Teknis TypeScript & Penilaian
 
-Fungsionalitas & alur auth 35% · TypeScript & arsitektur native 25% · Local Storage & real-time 20% · Kelengkapan fitur & UI/UX 20%. Bonus: desain antarmuka, audio panggilan.
+- **Kompilasi TypeScript**: Jalankan pengompilasi TypeScript (`tsc --watch`) untuk menghasilkan JavaScript di direktori output (misal `dist/`). Pastikan proyek dapat dijalankan langsung menggunakan Live Server.
+- **Rubrik Penilaian**:
+  1. Fungsionalitas & Alur Auth (**35%**)
+  2. Kesesuaian TypeScript & Arsitektur Native (**25%**)
+  3. Manajemen Local Storage & Real-time Update (**20%**)
+  4. Kelengkapan Fitur & UI/UX (**20%**)
+- **Nilai Tambahan (Bonus)**: Diberikan kepada kelompok yang memberikan *effort* lebih pada desain antarmuka, respon suara/audio panggilan antrian, atau fitur pendukung lainnya berbasis HTML/CSS/TS murni.

@@ -23,10 +23,14 @@ export function createTicket(code: string, priority: Priority): Ticket {
   return ticket;
 }
 
-// priority rank first, then oldest first
+// Tiket prioritas (VIP, Disabilitas, Lansia) didahulukan daripada Normal.
+// Di antara tiket prioritas, diurutkan berdasarkan angka antrian (number), lalu createdAt.
 export function sortQueue(tickets: Ticket[]): Ticket[] {
   return [...tickets].sort(
-    (a, b) => PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] || a.createdAt - b.createdAt,
+    (a, b) =>
+      PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority] ||
+      a.number - b.number ||
+      a.createdAt - b.createdAt,
   );
 }
 

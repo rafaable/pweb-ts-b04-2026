@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nomor Sedang Dipanggil</title>
+    <script>
+        // Auth Guard: Memastikan pengguna sudah login (wajib ada firstName di Local Storage)
+        (function () {
+            const firstName = localStorage.getItem("firstName");
+            let session = null;
+            try {
+                session = JSON.parse(localStorage.getItem("session"));
+            } catch (e) { }
+
+            const activeFirstName = firstName || session?.firstName;
+            if (!activeFirstName) {
+                window.location.replace("login.html");
+            } else if (!firstName && session?.firstName) {
+                localStorage.setItem("firstName", session.firstName);
+            }
+        })();
+    </script>
+    <style>
+        :root {
+            /* Teal Colors */
+            --primary-teal: #10787B;
+            --soft-teal: #AED9DE;
+            --pale-teal: #E3EFEF;
+            --muted-teal: #C1DBDB;
+            --cool-gray-teal: #D2DDDC;
+
+            /* White Colors */
+            --ice-white: #F1F8F9;
+            --off-white: #FEFEFE;
+
+            /* Gray Colors */
+            --charcoal: #30302E;
+            --cool-gray: #A3B0B7;
+            --neutral-gray: #C1C2C1;
+
+            /* Blue Colors */
+            --muted-blue: #5F95A4;
+
+            /* Additional Shades */
+            --deep-teal: #0C6669;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--ice-white);
+            color: var(--charcoal);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Top Navigation Bar */
+        .top-navbar {
+            background-color: var(--primary-teal);
+            color: var(--off-white);
+            padding: 12px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(16, 120, 123, 0.15);
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 50;
+            overflow: visible;
+        }
+
+        .brand-logo {
+            position: absolute;
+            top: 0px;
+            left: 24px;
+            height: 64px;
+            width: auto;
+            object-fit: contain;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            padding-left: 72px;
+            text-decoration: none;
+            color: var(--off-white);
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .user-panel {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 14px;
+        }
+
+        .user-greeting {
+            color: var(--off-white);
+            font-weight: 500;
+        }
+
+        .user-greeting strong {
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .btn-logout {
+            background: rgba(254, 254, 254, 0.15);
+            border: 1px solid rgba(254, 254, 254, 0.4);
+            color: var(--off-white);
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-logout:hover {
+            background: rgba(254, 254, 254, 0.28);
+            border-color: var(--off-white);
+        }
+
+        .btn-logout:active {
+            transform: scale(0.97);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 28px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--charcoal);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-buttons {
+            display: flex;
+            background-color: var(--cool-gray-teal);
+            padding: 4px;
+            border-radius: 8px;
+            gap: 4px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--charcoal);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--muted-teal);
+            color: var(--deep-teal);
+        }
+
+        .nav-btn:active {
+            transform: scale(0.97);
+        }
+
+        .nav-btn.active {
+            background-color: var(--charcoal);
+            color: var(--off-white);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-fullscreen {
+            background-color: var(--cool-gray-teal);
+            border: none;
+            padding: 8px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--charcoal);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-fullscreen:hover {
+            background-color: var(--muted-teal);
+            color: var(--deep-teal);
+        }
+
+        .btn-fullscreen:active {
+            transform: scale(0.97);
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--cool-gray);
+            margin-bottom: 28px;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .card {
+            background-color: var(--off-white);
+            border: 1px solid var(--cool-gray-teal);
+            border-radius: 12px;
+            padding: 24px 20px 16px 20px;
+            box-shadow: 0 4px 12px rgba(16, 120, 123, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 280px;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(16, 120, 123, 0.12);
+            border-color: var(--muted-teal);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--charcoal);
+        }
+
+        .card-badge {
+            background-color: var(--pale-teal);
+            color: var(--primary-teal);
+            font-size: 11px;
+            font-weight: 700;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        /* Card States Content */
+        .card-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        /* State: Dipanggil (Active Number) */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary-teal);
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background-color: var(--primary-teal);
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(16, 120, 123, 0.6);
+        }
+
+        .ticket-number {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--charcoal);
+            letter-spacing: -1px;
+        }
+
+        /* State: Kosong (Belum ada nomor) */
+        .empty-status {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--charcoal);
+            margin-bottom: 6px;
+        }
+
+        .empty-subtext {
+            font-size: 12px;
+            color: var(--cool-gray);
+            line-height: 1.4;
+            max-width: 200px;
+        }
+
+        /* Waiting Count Footer inside Card */
+        .waiting-count {
+            border-top: 1px dashed var(--cool-gray-teal);
+            padding-top: 12px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--cool-gray);
+            font-weight: 500;
+        }
+
+        /* Responsive adjustments */
+        @media(max-width: 768px) {
+            .top-navbar {
+                padding: 12px 16px;
+            }
+
+            .brand-logo {
+                left: 14px;
+                top: 4px;
+                height: 52px;
+            }
+
+            .brand {
+                padding-left: 58px;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .nav-btn {
+                flex: 1;
+                text-align: center;
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+
+            .btn-fullscreen {
+                width: 100%;
+                text-align: center;
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="top-navbar">
+        <img src="logo.png" alt="Logo B04 Medical" class="brand-logo">
+        <div class="brand">
+            <span class="brand-name">B04 Medical</span>
+        </div>
+        <div class="user-panel">
+            <span class="user-greeting">Selamat datang, <strong id="user-greeting">Pengguna</strong></span>
+            <button class="btn-logout" type="button" onclick="logoutUser()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <div>
+                <h1>Nomor sedang dipanggil</h1>
+                <p class="subtitle">Diperbarui <span id="tanggal-reload-layar">16.01.54</span></p>
+            </div>
+            <div class="header-actions">
+                <div class="nav-buttons">
+                    <button class="nav-btn active" onclick="window.location.href='layar.html'">Layar Antrian</button>
+                    <button class="nav-btn" onclick="window.location.href='ambil-antrian.html'">Ambil Nomor</button>
+                </div>
+                <button class="btn-fullscreen" id="fullscreen-btn" onclick="toggleFullscreen()">Layar penuh</button>
+            </div>
+        </header>
+
+        <div class="cards-grid">
+            <!-- Card 1: UMUM-1 (Dipanggil) -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">UMUM-1</span>
+                    <span class="card-badge">A</span>
+                </div>
+                <div class="card-content">
+                    <div class="status-indicator">
+                        <span class="status-dot"></span> DIPANGGIL
+                    </div>
+                    <div class="ticket-number">A-001</div>
+                </div>
+                <div class="waiting-count">0 tiket menunggu</div>
+            </div>
+
+            <!-- Card 2: UMUM-2 (Kosong / Belum ada) -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">UMUM-2</span>
+                    <span class="card-badge">B</span>
+                </div>
+                <div class="card-content">
+                    <div class="empty-status">Belum ada nomor dipanggil</div>
+                    <div class="empty-subtext">Nomor akan muncul setelah operator memanggil tiket.</div>
+                </div>
+                <div class="waiting-count">4 tiket menunggu</div>
+            </div>
+
+            <!-- Card 3: UMUM-3 (Kosong / Belum ada) -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">UMUM-3</span>
+                    <span class="card-badge">C</span>
+                </div>
+                <div class="card-content">
+                    <div class="empty-status">Belum ada nomor dipanggil</div>
+                    <div class="empty-subtext">Nomor akan muncul setelah operator memanggil tiket.</div>
+                </div>
+                <div class="waiting-count">1 tiket menunggu</div>
+            </div>
+
+            <!-- Card 4: GIGI (Dipanggil) -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">GIGI</span>
+                    <span class="card-badge">G</span>
+                </div>
+                <div class="card-content">
+                    <div class="status-indicator">
+                        <span class="status-dot"></span> DIPANGGIL
+                    </div>
+                    <div class="ticket-number">G-003</div>
+                </div>
+                <div class="waiting-count">2 tiket menunggu</div>
+            </div>
+
+            <!-- Card 5: FARMASI (Dipanggil) -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">FARMASI</span>
+                    <span class="card-badge">F</span>
+                </div>
+                <div class="card-content">
+                    <div class="status-indicator">
+                        <span class="status-dot"></span> DIPANGGIL
+                    </div>
+                    <div class="ticket-number">F-001</div>
+                </div>
+                <div class="waiting-count">0 tiket menunggu</div>
+            </div>
+
+            <!-- Card 6: PSIKOLOG (Kosong / Belum ada) -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">PSIKOLOG</span>
+                    <span class="card-badge">P</span>
+                </div>
+                <div class="card-content">
+                    <div class="empty-status">Belum ada nomor dipanggil</div>
+                    <div class="empty-subtext">Nomor akan muncul setelah operator memanggil tiket.</div>
+                </div>
+                <div class="waiting-count">3 tiket menunggu</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="dist/layar.js" defer></script>
+</body>
+
+</html>

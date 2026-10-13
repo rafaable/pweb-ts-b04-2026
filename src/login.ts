@@ -12,6 +12,7 @@ const passwordInput = document.getElementById("password") as HTMLInputElement;
 const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
 const errorBox = document.getElementById("error") as HTMLDivElement;
 
+// Admin & moderator -> dashboard, user biasa -> ambil antrian
 function redirectByRole(role: Role): void {
   window.location.replace(isAdmin(role) ? "index.html" : "ambil-antrian.html");
 }
@@ -27,13 +28,13 @@ function showError(message: string): void {
   errorBox.hidden = false;
 }
 
-// already logged in: offer to continue or log out instead of showing the form
+// Sudah login: tawarkan lanjut atau ganti akun, jangan tampilkan form
 const existing = getSession();
 if (existing) {
   noticeText.textContent = `Anda sudah masuk sebagai ${existing.firstName} (${existing.role}).`;
   notice.hidden = false;
   form.hidden = true;
-  continueBtn.addEventListener("click", () => redirectByRole(existing.role as Role));
+  continueBtn.addEventListener("click", () => redirectByRole(existing.role));
   switchBtn.addEventListener("click", () => {
     logout();
     window.location.reload();
@@ -45,15 +46,11 @@ form.addEventListener("submit", async (e) => {
   errorBox.hidden = true;
   setLoading(true);
   try {
-    // 1. User login
+    // login() memanggil API, mengambil role dari /auth/me, dan menyimpan sesi + firstName
     const session = await login(usernameInput.value.trim(), passwordInput.value);
 
-    // 2. Ambil firstName
-    const firstName = session.firstName;
-    const role = session.role as Role;
-
-    // 3. Validasi role: Izinkan admin, moderator, atau user
-    if (role !== "admin" && role !== "moderator" && role !== "user") {
+    // Hanya terima role yang dikenal (admin, moderator, user)
+    if (session.role !== "admin" && session.role !== "moderator" && session.role !== "user") {
       clearSession();
       localStorage.removeItem("firstName");
       showError("Role pengguna tidak dikenali");
@@ -61,10 +58,7 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
-    // 4. Simpan firstName dan arahkan sesuai role (Admin/Moderator ke index.html, User ke ambil-antrian.html)
-    localStorage.setItem("firstName", firstName);
-    redirectByRole(role);
-
+    redirectByRole(session.role);
   } catch (err) {
     showError(
       err instanceof TypeError

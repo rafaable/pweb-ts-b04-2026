@@ -9,6 +9,7 @@ const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
 const submitBtn = document.getElementById("submit-btn");
 const errorBox = document.getElementById("error");
+// Admin & moderator -> dashboard, user biasa -> ambil antrian
 function redirectByRole(role) {
     window.location.replace(isAdmin(role) ? "index.html" : "ambil-antrian.html");
 }
@@ -21,7 +22,7 @@ function showError(message) {
     errorBox.textContent = message;
     errorBox.hidden = false;
 }
-// already logged in: offer to continue or log out instead of showing the form
+// Sudah login: tawarkan lanjut atau ganti akun, jangan tampilkan form
 const existing = getSession();
 if (existing) {
     noticeText.textContent = `Anda sudah masuk sebagai ${existing.firstName} (${existing.role}).`;
@@ -38,22 +39,17 @@ form.addEventListener("submit", async (e) => {
     errorBox.hidden = true;
     setLoading(true);
     try {
-        // 1. User login
+        // login() memanggil API, mengambil role dari /auth/me, dan menyimpan sesi + firstName
         const session = await login(usernameInput.value.trim(), passwordInput.value);
-        // 2. Ambil firstName
-        const firstName = session.firstName;
-        const role = session.role;
-        // 3. Validasi role: Izinkan admin, moderator, atau user
-        if (role !== "admin" && role !== "moderator" && role !== "user") {
+        // Hanya terima role yang dikenal (admin, moderator, user)
+        if (session.role !== "admin" && session.role !== "moderator" && session.role !== "user") {
             clearSession();
             localStorage.removeItem("firstName");
             showError("Role pengguna tidak dikenali");
             setLoading(false);
             return;
         }
-        // 4. Simpan firstName dan arahkan sesuai role (Admin/Moderator ke index.html, User ke ambil-antrian.html)
-        localStorage.setItem("firstName", firstName);
-        redirectByRole(role);
+        redirectByRole(session.role);
     }
     catch (err) {
         showError(err instanceof TypeError

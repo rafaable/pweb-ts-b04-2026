@@ -12,11 +12,12 @@ const lastCalledTickets = new Map();
 let isInitialLoad = true;
 // Inisialisasi jenis antrian awal jika belum ada
 function ensureInitialQueueTypes() {
-    if (localStorage.getItem("queueTypes") === null) {
+    const current = getQueueTypes();
+    if (!current || current.length === 0) {
         saveQueueTypes(DEFAULT_TYPES);
     }
 }
-// Menampilkan status login atau mode publik pada navbar
+// Menampilkan nama pengguna yang sedang aktif
 function displayUserGreeting() {
     let firstName = localStorage.getItem("firstName");
     if (!firstName) {
@@ -29,40 +30,13 @@ function displayUserGreeting() {
             /* abaikan */
         }
     }
-    const textEl = document.getElementById("user-greeting-text");
-    const authBtn = document.getElementById("auth-btn");
-    if (firstName) {
-        if (textEl)
-            textEl.innerHTML = `Selamat datang, <strong id="user-greeting">${firstName}</strong>`;
-        if (authBtn) {
-            authBtn.textContent = "Logout";
-            authBtn.onclick = logoutUser;
-        }
-    }
-    else {
-        if (textEl)
-            textEl.textContent = "Selamat datang!";
-        if (authBtn) {
-            authBtn.textContent = "Login Petugas";
-            authBtn.onclick = () => {
-                window.location.href = "login.html";
-            };
-        }
-    }
-}
-export function handleAuthAction() {
-    const session = localStorage.getItem("session") || localStorage.getItem("firstName");
-    if (session) {
-        logoutUser();
-    }
-    else {
-        window.location.href = "login.html";
+    const greetingEl = document.getElementById("user-greeting");
+    if (greetingEl && firstName) {
+        greetingEl.textContent = firstName;
     }
 }
 // Logout pengguna
 export function logoutUser() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
     localStorage.removeItem("firstName");
     localStorage.removeItem("session");
     window.location.replace("login.html");
@@ -208,7 +182,6 @@ function renderScreen() {
 }
 window.logoutUser = logoutUser;
 window.toggleFullscreen = toggleFullscreen;
-window.handleAuthAction = handleAuthAction;
 // Inisialisasi saat halaman dimuat
 document.addEventListener("DOMContentLoaded", () => {
     ensureInitialQueueTypes();

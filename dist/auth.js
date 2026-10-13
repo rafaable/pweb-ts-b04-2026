@@ -24,8 +24,6 @@ export async function login(username, password) {
         throw new Error(me.message ?? "Gagal mengambil role pengguna");
     const session = { token, role: me.role, firstName: data.firstName };
     saveSession(session);
-    localStorage.setItem("token", token);
-    localStorage.setItem("role", me.role);
     localStorage.setItem("firstName", data.firstName);
     return session;
 }
@@ -41,8 +39,6 @@ export function requireAuth(allowed) {
 }
 export function logout() {
     clearSession();
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
     localStorage.removeItem("firstName");
     window.location.replace("login.html");
 }

@@ -1,6 +1,7 @@
 // Paste into the browser console on any page of this site (same origin) to test operator.html alone.
 // Then open operator.html.
 localStorage.setItem("session", JSON.stringify({ token: "fake-token", role: "user", firstName: "Tester" }));
+localStorage.setItem("firstName", "Tester"); // requireAuth now also checks this key
 localStorage.setItem("queueTypes", JSON.stringify([
   { code: "A", name: "Poli Umum", active: true, lastNumber: 5 },
   { code: "B", name: "Poli Gigi", active: true, lastNumber: 2 },

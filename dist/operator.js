@@ -1,4 +1,4 @@
-import { logout, requireAuth } from "./auth.js";
+import { isAdmin, logout, requireAuth } from "./auth.js";
 import { getQueueTypes, getTickets, saveTickets } from "./storage.js";
 import { sortQueue } from "./tickets.js";
 const SELECTED_KEY = "operatorQueue"; // only this page uses it
@@ -9,7 +9,7 @@ const PRIORITY_LABEL = {
     disabilitas: "Disabilitas",
     vip: "VIP",
 };
-const session = requireAuth();
+const session = requireAuth(isAdmin);
 const userInfo = document.getElementById("user-info");
 const logoutBtn = document.getElementById("logout-btn");
 const queueSelect = document.getElementById("queue-select");

@@ -179,7 +179,8 @@ function renderTicketList(tickets: Ticket[]): void {
 }
 
 function render(): void {
-  const types = getQueueTypes();
+  // Urutkan berdasarkan kode (A-Z) supaya daftar dan dropdown selalu rapi.
+  const types = [...getQueueTypes()].sort((a, b) => a.code.localeCompare(b.code));
   const tickets = getTickets();
   renderStats(tickets);
   renderTypeList(types);

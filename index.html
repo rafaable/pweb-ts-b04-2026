@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Admin - Antrian Rumah Sakit</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: #f1f5f9; color: #0f172a; }
+    header {
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+      padding: 0.8rem 1.5rem; background: #0284c7; color: #fff;
+    }
+    header h1 { margin: 0; font-size: 1.15rem; }
+    header .right { display: flex; align-items: center; gap: 0.8rem; font-size: 0.9rem; }
+    #logout-btn {
+      padding: 0.4rem 0.9rem; border: 1px solid #fff; border-radius: 6px;
+      background: transparent; color: #fff; cursor: pointer;
+    }
+    #logout-btn:hover { background: rgba(255, 255, 255, 0.2); }
+    main { max-width: 1000px; margin: 1.5rem auto; padding: 0 1rem; display: grid; gap: 1rem; }
+    .card { background: #fff; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08); }
+    .card h2 { margin: 0 0 0.9rem; font-size: 1.05rem; }
+    .label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+
+    #message { padding: 0.7rem 1rem; border-radius: 8px; font-size: 0.92rem; }
+    #message.error { background: #fee2e2; color: #991b1b; }
+    #message.success { background: #dcfce7; color: #166534; }
+
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+    .stat { text-align: center; }
+    .stat .num { margin: 0.2rem 0 0; font-size: 2rem; font-weight: 800; color: #0284c7; }
+
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+
+    form { display: grid; gap: 0.75rem; }
+    form label { display: block; margin-bottom: 0.3rem; font-size: 0.85rem; font-weight: 600; }
+    input, select {
+      width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #cbd5e1;
+      border-radius: 8px; font-size: 1rem; background: #fff;
+    }
+    input:focus, select:focus { outline: 2px solid #0284c7; border-color: transparent; }
+    #code-input { text-transform: uppercase; }
+    .row { display: grid; grid-template-columns: 90px 1fr; gap: 0.75rem; }
+
+    button.btn {
+      padding: 0.65rem 1rem; border: 0; border-radius: 8px; font-size: 0.95rem;
+      font-weight: 600; color: #fff; cursor: pointer; background: #0284c7;
+    }
+    button.btn:hover:not(:disabled) { filter: brightness(0.92); }
+    button.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    button.btn.green { background: #16a34a; }
+    button.btn.amber { background: #d97706; }
+    button.btn.red { background: #dc2626; }
+    button.btn.small { padding: 0.35rem 0.7rem; font-size: 0.82rem; }
+
+    .head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    .head h2 { margin: 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td { padding: 0.55rem 0.4rem; text-align: left; border-top: 1px solid #e2e8f0; }
+    th { border-top: 0; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
+    div.actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .empty { padding: 1rem 0 0.2rem; color: #64748b; text-align: center; }
+    .table-wrap { overflow-x: auto; }
+
+    .badge { padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; background: #e2e8f0; color: #334155; white-space: nowrap; }
+    .badge.vip { background: #fde68a; color: #92400e; }
+    .badge.disabilitas { background: #bfdbfe; color: #1e40af; }
+    .badge.lansia { background: #bbf7d0; color: #166534; }
+    .badge.on { background: #bbf7d0; color: #166534; }
+    .badge.off { background: #fecaca; color: #991b1b; }
+    .badge.waiting { background: #e0f2fe; color: #075985; }
+    .badge.called { background: #fde68a; color: #92400e; }
+    .badge.done { background: #dcfce7; color: #166534; }
+    .badge.skipped { background: #fee2e2; color: #991b1b; }
+  </style>
+  <script type="module" src="dist/index.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>Dashboard Admin</h1>
+    <div class="right">
+      <span id="user-info"></span>
+      <button id="logout-btn" type="button">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="message" role="alert" hidden></div>
+
+    <div class="stats">
+      <div class="card stat"><div class="label">Menunggu</div><div class="num" id="stat-waiting">0</div></div>
+      <div class="card stat"><div class="label">Dipanggil</div><div class="num" id="stat-called">0</div></div>
+      <div class="card stat"><div class="label">Selesai</div><div class="num" id="stat-done">0</div></div>
+      <div class="card stat"><div class="label">Dilewati</div><div class="num" id="stat-skipped">0</div></div>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <h2>Tambah Jenis Antrian</h2>
+        <form id="type-form" novalidate>
+          <div class="row">
+            <div>
+              <label for="code-input">Kode</label>
+              <input id="code-input" type="text" maxlength="1" placeholder="C" autocomplete="off" />
+            </div>
+            <div>
+              <label for="name-input">Nama Layanan</label>
+              <input id="name-input" type="text" placeholder="Contoh: Farmasi" autocomplete="off" />
+            </div>
+          </div>
+          <button class="btn" type="submit">Tambah Jenis</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>Terbitkan Tiket Manual</h2>
+        <form id="ticket-form" novalidate>
+          <div>
+            <label for="ticket-type">Jenis Antrian</label>
+            <select id="ticket-type"></select>
+          </div>
+          <div>
+            <label for="ticket-priority">Tingkat Prioritas</label>
+            <select id="ticket-priority">
+              <option value="normal">Normal</option>
+              <option value="lansia">Lansia</option>
+              <option value="disabilitas">Disabilitas</option>
+              <option value="vip">VIP</option>
+            </select>
+          </div>
+          <button class="btn green" id="ticket-submit" type="submit">Terbitkan Tiket</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="head">
+        <h2>Daftar Jenis Antrian</h2>
+        <button class="btn red" id="reset-btn" type="button">Reset Antrian</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Kode</th><th>Nama Layanan</th><th>Status</th><th>Nomor Terakhir</th><th>Aksi</th></tr>
+          </thead>
+          <tbody id="type-list"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="type-empty" hidden>Belum ada jenis antrian.</div>
+    </div>
+
+    <div class="card">
+      <h2>Tiket Terbaru</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Tiket</th><th>Jenis</th><th>Prioritas</th><th>Status</th><th>Waktu</th></tr>
+          </thead>
+          <tbody id="ticket-list"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="ticket-empty" hidden>Belum ada tiket.</div>
+    </div>
+  </main>
+</body>
+</html>

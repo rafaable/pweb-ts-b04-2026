@@ -30,16 +30,14 @@ function showError(message: string): void {
 // already logged in: offer to continue or log out instead of showing the form
 const existing = getSession();
 if (existing) {
-  if (existing.role !== "user") {
-    clearSession();
-    localStorage.removeItem("firstName");
-  } else {
-    noticeText.textContent = `Anda sudah masuk sebagai ${existing.firstName} (${existing.role}).`;
-    notice.hidden = false;
-    form.hidden = true;
-    continueBtn.addEventListener("click", () => window.location.replace("ambil-antrian.html"));
-    switchBtn.addEventListener("click", logout);
-  }
+  noticeText.textContent = `Anda sudah masuk sebagai ${existing.firstName} (${existing.role}).`;
+  notice.hidden = false;
+  form.hidden = true;
+  continueBtn.addEventListener("click", () => redirectByRole(existing.role as Role));
+  switchBtn.addEventListener("click", () => {
+    logout();
+    window.location.reload();
+  });
 }
 
 form.addEventListener("submit", async (e) => {
@@ -50,38 +48,23 @@ form.addEventListener("submit", async (e) => {
     // 1. User login
     const session = await login(usernameInput.value.trim(), passwordInput.value);
 
-    // 2. Cari firstName
+    // 2. Ambil firstName
     const firstName = session.firstName;
+    const role = session.role as Role;
 
-    // 3. Berdasarkan firstName, cek role di json bersesuaian sesuai firstName nya
-    const filterRes = await fetch("https://dummyjson.com/users/filter?key=role&value=user");
-    const filterData = await filterRes.json();
-    let users: Array<{ firstName: string; role: string }> = filterData.users || [];
-
-    let matchedUser = users.find(
-      (u) => u.firstName.toLowerCase() === firstName.toLowerCase()
-    );
-
-    if (!matchedUser && filterData.total > users.length) {
-      const allRes = await fetch("https://dummyjson.com/users/filter?key=role&value=user&limit=0");
-      const allData = await allRes.json();
-      users = allData.users || [];
-      matchedUser = users.find(
-        (u) => u.firstName.toLowerCase() === firstName.toLowerCase()
-      );
-    }
-
-    // 4. Kalau rolenya bukan "user", gaboleh masuk dan tampilkan error
-    if (session.role !== "user" || !matchedUser || matchedUser.role !== "user") {
+    // 3. Validasi role: Izinkan admin, moderator, atau user
+    if (role !== "admin" && role !== "moderator" && role !== "user") {
       clearSession();
       localStorage.removeItem("firstName");
-      showError("user nggak tersedia");
+      showError("Role pengguna tidak dikenali");
       setLoading(false);
       return;
     }
 
+    // 4. Simpan firstName dan arahkan sesuai role (Admin/Moderator ke index.html, User ke ambil-antrian.html)
     localStorage.setItem("firstName", firstName);
-    window.location.replace("ambil-antrian.html");
+    redirectByRole(role);
+
   } catch (err) {
     showError(
       err instanceof TypeError

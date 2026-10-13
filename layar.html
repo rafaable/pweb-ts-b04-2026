@@ -5,23 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nomor Sedang Dipanggil</title>
-    <script>
-        // Auth Guard: Memastikan pengguna sudah login (wajib ada firstName di Local Storage)
-        (function () {
-            const firstName = localStorage.getItem("firstName");
-            let session = null;
-            try {
-                session = JSON.parse(localStorage.getItem("session"));
-            } catch (e) { }
-
-            const activeFirstName = firstName || session?.firstName;
-            if (!activeFirstName) {
-                window.location.replace("login.html");
-            } else if (!firstName && session?.firstName) {
-                localStorage.setItem("firstName", session.firstName);
-            }
-        })();
-    </script>
     <style>
         :root {
             /* Teal Colors */
@@ -417,9 +400,9 @@
         <div class="brand">
             <span class="brand-name">B04 Medical</span>
         </div>
-        <div class="user-panel">
-            <span class="user-greeting">Selamat datang, <strong id="user-greeting">Pengguna</strong></span>
-            <button class="btn-logout" type="button" onclick="logoutUser()">Logout</button>
+        <div class="user-panel" id="user-panel">
+            <span class="user-greeting" id="user-greeting-text">Selamat datang!</span>
+            <button class="btn-logout" id="auth-btn" type="button" onclick="handleAuthAction()">Login Petugas</button>
         </div>
     </nav>
 
@@ -427,7 +410,7 @@
         <header>
             <div>
                 <h1>Nomor sedang dipanggil</h1>
-                <p class="subtitle">Diperbarui <span id="tanggal-reload-layar">16.01.54</span></p>
+                <p class="subtitle">Diperbarui <span id="tanggal-reload-layar">--.--.--</span></p>
             </div>
             <div class="header-actions">
                 <div class="nav-buttons">
@@ -439,89 +422,7 @@
         </header>
 
         <div class="cards-grid">
-            <!-- Card 1: UMUM-1 (Dipanggil) -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">UMUM-1</span>
-                    <span class="card-badge">A</span>
-                </div>
-                <div class="card-content">
-                    <div class="status-indicator">
-                        <span class="status-dot"></span> DIPANGGIL
-                    </div>
-                    <div class="ticket-number">A-001</div>
-                </div>
-                <div class="waiting-count">0 tiket menunggu</div>
-            </div>
-
-            <!-- Card 2: UMUM-2 (Kosong / Belum ada) -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">UMUM-2</span>
-                    <span class="card-badge">B</span>
-                </div>
-                <div class="card-content">
-                    <div class="empty-status">Belum ada nomor dipanggil</div>
-                    <div class="empty-subtext">Nomor akan muncul setelah operator memanggil tiket.</div>
-                </div>
-                <div class="waiting-count">4 tiket menunggu</div>
-            </div>
-
-            <!-- Card 3: UMUM-3 (Kosong / Belum ada) -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">UMUM-3</span>
-                    <span class="card-badge">C</span>
-                </div>
-                <div class="card-content">
-                    <div class="empty-status">Belum ada nomor dipanggil</div>
-                    <div class="empty-subtext">Nomor akan muncul setelah operator memanggil tiket.</div>
-                </div>
-                <div class="waiting-count">1 tiket menunggu</div>
-            </div>
-
-            <!-- Card 4: GIGI (Dipanggil) -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">GIGI</span>
-                    <span class="card-badge">G</span>
-                </div>
-                <div class="card-content">
-                    <div class="status-indicator">
-                        <span class="status-dot"></span> DIPANGGIL
-                    </div>
-                    <div class="ticket-number">G-003</div>
-                </div>
-                <div class="waiting-count">2 tiket menunggu</div>
-            </div>
-
-            <!-- Card 5: FARMASI (Dipanggil) -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">FARMASI</span>
-                    <span class="card-badge">F</span>
-                </div>
-                <div class="card-content">
-                    <div class="status-indicator">
-                        <span class="status-dot"></span> DIPANGGIL
-                    </div>
-                    <div class="ticket-number">F-001</div>
-                </div>
-                <div class="waiting-count">0 tiket menunggu</div>
-            </div>
-
-            <!-- Card 6: PSIKOLOG (Kosong / Belum ada) -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">PSIKOLOG</span>
-                    <span class="card-badge">P</span>
-                </div>
-                <div class="card-content">
-                    <div class="empty-status">Belum ada nomor dipanggil</div>
-                    <div class="empty-subtext">Nomor akan muncul setelah operator memanggil tiket.</div>
-                </div>
-                <div class="waiting-count">3 tiket menunggu</div>
-            </div>
+            <!-- Kartu antrian di-render secara dinamis dari Local Storage -->
         </div>
     </div>
 

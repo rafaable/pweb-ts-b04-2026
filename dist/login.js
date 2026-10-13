@@ -9,9 +9,9 @@ const usernameInput = document.getElementById("username");
 const passwordInput = document.getElementById("password");
 const submitBtn = document.getElementById("submit-btn");
 const errorBox = document.getElementById("error");
-// Admin & moderator -> dashboard, user biasa -> ambil antrian
+// Admin & moderator -> dashboard admin, user biasa (petugas) -> panel operator
 function redirectByRole(role) {
-    window.location.replace(isAdmin(role) ? "index.html" : "ambil-antrian.html");
+    window.location.replace(isAdmin(role) ? "index.html" : "operator.html");
 }
 function setLoading(loading) {
     submitBtn.disabled = loading;

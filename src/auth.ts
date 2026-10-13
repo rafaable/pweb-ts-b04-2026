@@ -40,6 +40,8 @@ export async function login(username: string, password: string): Promise<Session
 
   const session: Session = { token, role: me.role, firstName: data.firstName };
   saveSession(session);
+  localStorage.setItem("token", token);
+  localStorage.setItem("role", me.role);
   localStorage.setItem("firstName", data.firstName);
   return session;
 }
@@ -57,6 +59,8 @@ export function requireAuth(allowed?: (role: Role) => boolean): Session | null {
 
 export function logout(): void {
   clearSession();
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
   localStorage.removeItem("firstName");
   window.location.replace("login.html");
 }

@@ -5,65 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ambil Nomor Antrian</title>
-    <script>
-        // Auth Guard: Memastikan pengguna sudah login dan firstName terverifikasi punya role "user"
-        (function () {
-            const firstName = localStorage.getItem("firstName");
-            let session = null;
-            try {
-                session = JSON.parse(localStorage.getItem("session"));
-            } catch (e) { }
-
-            const activeFirstName = firstName || session?.firstName;
-            if (!activeFirstName) {
-                window.location.replace("login.html");
-                return;
-            }
-
-            // Jika ada sesi tapi role bukan "user", tolak akses
-            if (session && session.role && session.role !== "user") {
-                localStorage.removeItem("firstName");
-                localStorage.removeItem("session");
-                window.location.replace("login.html");
-                return;
-            }
-
-            // Periksa API https://dummyjson.com/users/filter?key=role&value=user
-            // dan pastikan firstName yang tersimpan di local storage punya role : "user"
-            fetch("https://dummyjson.com/users/filter?key=role&value=user")
-                .then(function (res) { return res.json(); })
-                .then(function (data) {
-                    let users = data.users || [];
-                    let matched = users.find(function (u) {
-                        return u.firstName && u.firstName.toLowerCase() === activeFirstName.toLowerCase();
-                    });
-
-                    if (!matched && data.total > users.length) {
-                        return fetch("https://dummyjson.com/users/filter?key=role&value=user&limit=0")
-                            .then(function (res2) { return res2.json(); })
-                            .then(function (data2) {
-                                users = data2.users || [];
-                                return users.find(function (u) {
-                                    return u.firstName && u.firstName.toLowerCase() === activeFirstName.toLowerCase();
-                                });
-                            });
-                    }
-                    return matched;
-                })
-                .then(function (userMatch) {
-                    if (!userMatch || userMatch.role !== "user") {
-                        localStorage.removeItem("firstName");
-                        localStorage.removeItem("session");
-                        window.location.replace("login.html");
-                    } else if (!firstName && activeFirstName) {
-                        localStorage.setItem("firstName", activeFirstName);
-                    }
-                })
-                .catch(function (err) {
-                    console.error("Gagal verifikasi role user:", err);
-                });
-        })();
-    </script>
     <style>
         :root {
             /* Teal Colors */
@@ -537,9 +478,9 @@
         <div class="brand">
             <span class="brand-name">B04 Medical</span>
         </div>
-        <div class="user-panel">
-            <span class="user-greeting">Selamat datang, <strong id="user-greeting">Pengguna</strong></span>
-            <button class="btn-logout" type="button" onclick="logoutUser()">Logout</button>
+        <div class="user-panel" id="user-panel">
+            <span class="user-greeting" id="user-greeting-text">Selamat datang!</span>
+            <button class="btn-logout" id="auth-btn" type="button" onclick="handleAuthAction()">Login Petugas</button>
         </div>
     </nav>
 
@@ -560,125 +501,7 @@
         </header>
 
         <div class="cards-grid">
-            <!-- Card 1: UMUM-1 -->
-            <div class="card">
-                <div>
-                    <div class="card-header">
-                        <span class="card-title">UMUM-1</span>
-                        <span class="card-badge">A</span>
-                    </div>
-                    <div class="priority-section">
-                        <label class="priority-label" for="priority-UMUM-1">Pilih prioritas:</label>
-                        <select class="priority-select" id="priority-UMUM-1">
-                            <option value="Normal" selected>Normal</option>
-                            <option value="Lansia">Lansia</option>
-                            <option value="Disabilitas">Disabilitas</option>
-                            <option value="VIP">VIP</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn-ambil" onclick="ambilNomor('UMUM-1', this)">Ambil Nomor</button>
-            </div>
-
-            <!-- Card 2: UMUM-2 -->
-            <div class="card">
-                <div>
-                    <div class="card-header">
-                        <span class="card-title">UMUM-2</span>
-                        <span class="card-badge">B</span>
-                    </div>
-                    <div class="priority-section">
-                        <label class="priority-label" for="priority-UMUM-2">Pilih prioritas:</label>
-                        <select class="priority-select" id="priority-UMUM-2">
-                            <option value="Normal" selected>Normal</option>
-                            <option value="Lansia">Lansia</option>
-                            <option value="Disabilitas">Disabilitas</option>
-                            <option value="VIP">VIP</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn-ambil" onclick="ambilNomor('UMUM-2', this)">Ambil Nomor</button>
-            </div>
-
-            <!-- Card 3: UMUM-3 -->
-            <div class="card">
-                <div>
-                    <div class="card-header">
-                        <span class="card-title">UMUM-3</span>
-                        <span class="card-badge">C</span>
-                    </div>
-                    <div class="priority-section">
-                        <label class="priority-label" for="priority-UMUM-3">Pilih prioritas:</label>
-                        <select class="priority-select" id="priority-UMUM-3">
-                            <option value="Normal" selected>Normal</option>
-                            <option value="Lansia">Lansia</option>
-                            <option value="Disabilitas">Disabilitas</option>
-                            <option value="VIP">VIP</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn-ambil" onclick="ambilNomor('UMUM-3', this)">Ambil Nomor</button>
-            </div>
-
-            <!-- Card 4: GIGI -->
-            <div class="card">
-                <div>
-                    <div class="card-header">
-                        <span class="card-title">GIGI</span>
-                        <span class="card-badge">G</span>
-                    </div>
-                    <div class="priority-section">
-                        <label class="priority-label" for="priority-GIGI">Pilih prioritas:</label>
-                        <select class="priority-select" id="priority-GIGI">
-                            <option value="Normal" selected>Normal</option>
-                            <option value="Lansia">Lansia</option>
-                            <option value="Disabilitas">Disabilitas</option>
-                            <option value="VIP">VIP</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn-ambil" onclick="ambilNomor('GIGI', this)">Ambil Nomor</button>
-            </div>
-
-            <!-- Card 5: FARMASI -->
-            <div class="card">
-                <div>
-                    <div class="card-header">
-                        <span class="card-title">FARMASI</span>
-                        <span class="card-badge">F</span>
-                    </div>
-                    <div class="priority-section">
-                        <label class="priority-label" for="priority-FARMASI">Pilih prioritas:</label>
-                        <select class="priority-select" id="priority-FARMASI">
-                            <option value="Normal" selected>Normal</option>
-                            <option value="Lansia">Lansia</option>
-                            <option value="Disabilitas">Disabilitas</option>
-                            <option value="VIP">VIP</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn-ambil" onclick="ambilNomor('FARMASI', this)">Ambil Nomor</button>
-            </div>
-
-            <!-- Card 6: PSIKOLOG -->
-            <div class="card">
-                <div>
-                    <div class="card-header">
-                        <span class="card-title">PSIKOLOG</span>
-                        <span class="card-badge">P</span>
-                    </div>
-                    <div class="priority-section">
-                        <label class="priority-label" for="priority-PSIKOLOG">Pilih prioritas:</label>
-                        <select class="priority-select" id="priority-PSIKOLOG">
-                            <option value="Normal" selected>Normal</option>
-                            <option value="Lansia">Lansia</option>
-                            <option value="Disabilitas">Disabilitas</option>
-                            <option value="VIP">VIP</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="btn-ambil" onclick="ambilNomor('PSIKOLOG', this)">Ambil Nomor</button>
-            </div>
+            <!-- Kartu antrian di-render secara dinamis dari Local Storage -->
         </div>
 
         <footer>

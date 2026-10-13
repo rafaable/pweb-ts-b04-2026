@@ -12,9 +12,9 @@ const passwordInput = document.getElementById("password") as HTMLInputElement;
 const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
 const errorBox = document.getElementById("error") as HTMLDivElement;
 
-// Admin & moderator -> dashboard, user biasa -> ambil antrian
+// Admin & moderator -> dashboard admin, user biasa (petugas) -> panel operator
 function redirectByRole(role: Role): void {
-  window.location.replace(isAdmin(role) ? "index.html" : "ambil-antrian.html");
+  window.location.replace(isAdmin(role) ? "index.html" : "operator.html");
 }
 
 function setLoading(loading: boolean): void {

@@ -70,7 +70,7 @@ function errorText(err: unknown): string {
   return err instanceof Error ? err.message : "Terjadi kesalahan tidak dikenal";
 }
 
-// Jenis awal supaya demo mudah. Hanya dibuat kalau key queueTypes belum pernah ada,
+// Hanya dibuat kalau key queueTypes belum pernah ada,
 // jadi tidak muncul lagi setelah admin sengaja menghapus semuanya.
 function seedDefaultTypes(): void {
   if (localStorage.getItem("queueTypes") !== null) return;
@@ -188,7 +188,7 @@ function render(): void {
   renderTicketList(tickets);
 }
 
-// Kode wajib 1 huruf kapital; kode & nama tidak boleh kembar (case-insensitive).
+// Kode wajib 1 huruf kapital, kode & nama tidak boleh kembar (case-insensitive).
 function addType(codeRaw: string, nameRaw: string): void {
   const code = codeRaw.trim().toUpperCase();
   const name = nameRaw.trim().replace(/\s+/g, " ");

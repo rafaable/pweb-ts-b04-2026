@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ambil Nomor Antrian</title>
     <script>
-        // Auth Guard: Memastikan pengguna sudah login dan firstName terverifikasi punya role "user"
+        // Auth Guard: semua role yang sudah login (user, admin, moderator) boleh masuk
         (function () {
             const firstName = localStorage.getItem("firstName");
             let session = null;
@@ -17,51 +17,9 @@
             const activeFirstName = firstName || session?.firstName;
             if (!activeFirstName) {
                 window.location.replace("login.html");
-                return;
+            } else if (!firstName && session?.firstName) {
+                localStorage.setItem("firstName", session.firstName);
             }
-
-            // Jika ada sesi tapi role bukan "user", tolak akses
-            if (session && session.role && session.role !== "user") {
-                localStorage.removeItem("firstName");
-                localStorage.removeItem("session");
-                window.location.replace("login.html");
-                return;
-            }
-
-            // Periksa API https://dummyjson.com/users/filter?key=role&value=user
-            // dan pastikan firstName yang tersimpan di local storage punya role : "user"
-            fetch("https://dummyjson.com/users/filter?key=role&value=user")
-                .then(function (res) { return res.json(); })
-                .then(function (data) {
-                    let users = data.users || [];
-                    let matched = users.find(function (u) {
-                        return u.firstName && u.firstName.toLowerCase() === activeFirstName.toLowerCase();
-                    });
-
-                    if (!matched && data.total > users.length) {
-                        return fetch("https://dummyjson.com/users/filter?key=role&value=user&limit=0")
-                            .then(function (res2) { return res2.json(); })
-                            .then(function (data2) {
-                                users = data2.users || [];
-                                return users.find(function (u) {
-                                    return u.firstName && u.firstName.toLowerCase() === activeFirstName.toLowerCase();
-                                });
-                            });
-                    }
-                    return matched;
-                })
-                .then(function (userMatch) {
-                    if (!userMatch || userMatch.role !== "user") {
-                        localStorage.removeItem("firstName");
-                        localStorage.removeItem("session");
-                        window.location.replace("login.html");
-                    } else if (!firstName && activeFirstName) {
-                        localStorage.setItem("firstName", activeFirstName);
-                    }
-                })
-                .catch(function (err) {
-                    console.error("Gagal verifikasi role user:", err);
-                });
         })();
     </script>
     <style>

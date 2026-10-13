@@ -178,10 +178,19 @@ function renderTicketList(tickets: Ticket[]): void {
   ticketEmpty.hidden = tickets.length > 0;
 }
 
+let lastSnapshot = "";
+
 function render(): void {
   // Urutkan berdasarkan kode (A-Z) supaya daftar dan dropdown selalu rapi.
   const types = [...getQueueTypes()].sort((a, b) => a.code.localeCompare(b.code));
   const tickets = getTickets();
+
+  // Polling berjalan tiap 2 detik. Tabel hanya digambar ulang kalau datanya berubah,
+  // supaya tombol tidak terganti di tengah klik.
+  const snapshot = JSON.stringify([types, tickets]);
+  if (snapshot === lastSnapshot) return;
+  lastSnapshot = snapshot;
+
   renderStats(tickets);
   renderTypeList(types);
   renderTicketTypeSelect(types);

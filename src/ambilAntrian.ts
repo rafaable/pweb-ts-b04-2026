@@ -20,12 +20,13 @@ const PRIORITY_LABELS: Record<Priority, string> = {
 
 // Inisialisasi jenis antrian awal jika Local Storage masih kosong
 function ensureInitialQueueTypes(): void {
-  if (localStorage.getItem("queueTypes") === null) {
+  const current = getQueueTypes();
+  if (!current || current.length === 0) {
     saveQueueTypes(DEFAULT_TYPES);
   }
 }
 
-// Menampilkan status login atau mode publik pada navbar
+// Menampilkan nama pengguna yang sedang aktif
 function displayUserGreeting(): void {
   let firstName = localStorage.getItem("firstName");
   if (!firstName) {
@@ -36,40 +37,14 @@ function displayUserGreeting(): void {
       /* abaikan */
     }
   }
-
-  const textEl = document.getElementById("user-greeting-text");
-  const authBtn = document.getElementById("auth-btn") as HTMLButtonElement | null;
-
-  if (firstName) {
-    if (textEl) textEl.innerHTML = `Selamat datang, <strong id="user-greeting">${firstName}</strong>`;
-    if (authBtn) {
-      authBtn.textContent = "Logout";
-      authBtn.onclick = logoutUser;
-    }
-  } else {
-    if (textEl) textEl.textContent = "Selamat datang!";
-    if (authBtn) {
-      authBtn.textContent = "Login Petugas";
-      authBtn.onclick = () => {
-        window.location.href = "login.html";
-      };
-    }
-  }
-}
-
-export function handleAuthAction(): void {
-  const session = localStorage.getItem("session") || localStorage.getItem("firstName");
-  if (session) {
-    logoutUser();
-  } else {
-    window.location.href = "login.html";
+  const greetingEl = document.getElementById("user-greeting");
+  if (greetingEl && firstName) {
+    greetingEl.textContent = firstName;
   }
 }
 
 // Logout pengguna
 export function logoutUser(): void {
-  localStorage.removeItem("token");
-  localStorage.removeItem("role");
   localStorage.removeItem("firstName");
   localStorage.removeItem("session");
   window.location.replace("login.html");
@@ -195,30 +170,9 @@ function handleAmbilNomor(code: string, name: string, priority: Priority): void 
   try {
     const ticket = createTicket(code, priority);
     const priorityLabel = PRIORITY_LABELS[priority] || "Normal";
-    const timeStr = new Date(ticket.createdAt).toLocaleTimeString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-
     showModal(
       "Nomor Berhasil Diambil",
-      `
-      <div style="margin: 10px 0 16px;">
-        <div style="font-size: 2.8rem; font-weight: 800; color: var(--primary-teal); letter-spacing: 1px; line-height: 1.1;">
-          ${ticket.id}
-        </div>
-        <div style="margin-top: 8px; font-size: 1.05rem; font-weight: 600; color: var(--charcoal);">
-          ${name}
-        </div>
-        <div style="margin-top: 4px; font-size: 0.85rem; color: var(--cool-gray);">
-          Prioritas: <strong style="color: var(--charcoal);">${priorityLabel}</strong> · Waktu: ${timeStr}
-        </div>
-      </div>
-      <div style="font-size: 0.85rem; color: var(--deep-teal); background: var(--pale-teal); padding: 10px 14px; border-radius: 8px; line-height: 1.4;">
-        Nomor tiket Anda telah terdaftar dalam sistem. Silakan duduk dan perhatikan <strong>Layar Antrian</strong> hingga nomor Anda dipanggil oleh petugas.
-      </div>
-      `
+      `Nomor antrian <strong>${ticket.id}</strong> untuk layanan <strong>${name}</strong> berhasil diambil dengan prioritas: <strong>${priorityLabel}</strong>.<br><br>Silakan menunggu nomor panggilan Anda.`
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : "Terjadi kesalahan saat mengambil tiket";
@@ -243,23 +197,11 @@ declare global {
     logoutUser?: () => void;
     toggleFullscreen?: () => void;
     closeModal?: () => void;
-    handleAuthAction?: () => void;
-    ambilNomor?: (codeOrName: string) => void;
   }
 }
 window.logoutUser = logoutUser;
 window.toggleFullscreen = toggleFullscreen;
 window.closeModal = closeModal;
-window.handleAuthAction = handleAuthAction;
-window.ambilNomor = (codeOrName: string) => {
-  const types = getQueueTypes().filter((t) => t.active);
-  const found = types.find((t) => t.code === codeOrName || t.name === codeOrName);
-  if (found) {
-    const select = document.getElementById(`priority-${found.code}`) as HTMLSelectElement | null;
-    const priority = (select?.value as Priority) || "normal";
-    handleAmbilNomor(found.code, found.name, priority);
-  }
-};
 
 // Inisialisasi halaman saat dimuat
 document.addEventListener("DOMContentLoaded", () => {

@@ -54,7 +54,7 @@ function showMessage(text, kind) {
 function errorText(err) {
     return err instanceof Error ? err.message : "Terjadi kesalahan tidak dikenal";
 }
-// Jenis awal supaya demo mudah. Hanya dibuat kalau key queueTypes belum pernah ada,
+// Hanya dibuat kalau key queueTypes belum pernah ada,
 // jadi tidak muncul lagi setelah admin sengaja menghapus semuanya.
 function seedDefaultTypes() {
     if (localStorage.getItem("queueTypes") !== null)
@@ -131,16 +131,23 @@ function renderTicketList(tickets) {
     }));
     ticketEmpty.hidden = tickets.length > 0;
 }
+let lastSnapshot = "";
 function render() {
     // Urutkan berdasarkan kode (A-Z) supaya daftar dan dropdown selalu rapi.
     const types = [...getQueueTypes()].sort((a, b) => a.code.localeCompare(b.code));
     const tickets = getTickets();
+    // Polling berjalan tiap 2 detik. Tabel hanya digambar ulang kalau datanya berubah,
+    // supaya tombol tidak terganti di tengah klik.
+    const snapshot = JSON.stringify([types, tickets]);
+    if (snapshot === lastSnapshot)
+        return;
+    lastSnapshot = snapshot;
     renderStats(tickets);
     renderTypeList(types);
     renderTicketTypeSelect(types);
     renderTicketList(tickets);
 }
-// Kode wajib 1 huruf kapital; kode & nama tidak boleh kembar (case-insensitive).
+// Kode wajib 1 huruf kapital, kode & nama tidak boleh kembar (case-insensitive).
 function addType(codeRaw, nameRaw) {
     const code = codeRaw.trim().toUpperCase();
     const name = nameRaw.trim().replace(/\s+/g, " ");

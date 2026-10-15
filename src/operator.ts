@@ -1,5 +1,5 @@
 import type { Priority, QueueType, Ticket } from "./types.js";
-import { logout, requireAuth } from "./auth.js";
+import { isAdmin, logout, requireAuth } from "./auth.js";
 import { getQueueTypes, getTickets, saveTickets } from "./storage.js";
 import { sortQueue } from "./tickets.js";
 
@@ -13,7 +13,7 @@ const PRIORITY_LABEL: Record<Priority, string> = {
   vip: "VIP",
 };
 
-const session = requireAuth();
+const session = requireAuth(isAdmin);
 
 const userInfo = document.getElementById("user-info") as HTMLSpanElement;
 const logoutBtn = document.getElementById("logout-btn") as HTMLButtonElement;

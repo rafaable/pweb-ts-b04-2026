@@ -40,8 +40,9 @@ HTML loads scripts as `<script type="module" src="dist/<page>.js" defer></script
 - All data persists in **Local Storage**: session (token, role, firstName), queue types, tickets
 - Login: POST `https://dummyjson.com/auth/login`, role from the response. **moderator = admin**
 - Test users: `https://dummyjson.com/users/filter?key=role&value=admin` and `...value=user`
-- Public pages (no login): `layar.html`, `ambil-antrian.html`
-- Protected: `index.html` (admin/moderator only), `operator.html` (any logged-in user). Otherwise redirect to `login.html`
+- Revised soal (13 Oct 2026): every page except `login.html` needs a login, no public pages
+- Role access: `user` -> `ambil-antrian.html`, `layar.html`. `admin`/`moderator` -> `index.html`, `operator.html`, `ambil-antrian.html`, `layar.html`
+- Otherwise redirect to `login.html`
 - Ticket format: `A-001` (code + 3-digit number)
 - Priority order: VIP / Disabilitas / Lansia before Normal
 - Errors shown visually (try...catch); loading state on login
@@ -64,17 +65,18 @@ Local Storage keys: `session`, `queueTypes`, `tickets` (JSON).
 Agreed conventions:
 - `createTicket(code, priority)` (in `tickets.ts`) is the only way to make a ticket; it bumps `QueueType.lastNumber`
 - Reset Antrian: clear `tickets` and set every `lastNumber` to 0
-- Queue order: priority rank (vip > disabilitas > lansia > normal), then `createdAt`
+- Queue order: vip/disabilitas/lansia (rank 0) before normal (rank 1), then ticket `number`, then `createdAt`
 - Lewati sets status `skipped` (not recalled)
 - `layar.html` polls every 2-3s
-- Regular `user` role redirects to `operator.html` after login
+- After login: admin/moderator -> `index.html`, regular `user` -> `ambil-antrian.html`
+- `login()` also stores a separate `firstName` key; `requireAuth` checks it, so seed snippets must set it
 
 ## Work split (pages are the soal's numbering)
 | Owner | Pages |
 |---|---|
 | Ava | 1. `login.html`, 3. `operator.html` |
-| Teammate A | 2. `index.html` (admin dashboard, queue-type CRUD, manual ticket) |
-| Teammate B | 4. `layar.html`, 5. `ambil-antrian.html` |
+| Nay | 2. `index.html` (admin dashboard, queue-type CRUD, manual ticket) |
+| Rafa | 4. `layar.html`, 5. `ambil-antrian.html` |
 
 (Edit this table if the split changes.)
 
